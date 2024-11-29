@@ -110,7 +110,7 @@ export default function Home() {
               placeholder="Enter your password"
               value={formData.password}
               onChange={handleInputChange}
-              className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full text-black p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
           </div>
@@ -124,7 +124,7 @@ export default function Home() {
               placeholder="Confirm your password"
               value={formData.confirmPassword}
               onChange={handleInputChange}
-              className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full text-black p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
           </div>

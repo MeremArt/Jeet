@@ -168,7 +168,7 @@ export default function BankSelection() {
           placeholder="Search for your bank (name, country, code)..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mb-6"
+          className="w-full text-black p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mb-6"
         />
         {filteredBanks.length === 0 ? (
           <p className="text-center text-gray-500">No banks found</p>

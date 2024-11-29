@@ -62,7 +62,7 @@ export default function Account() {
           }),
         }
       );
-
+      localStorage.setItem("accountNumber", formData.accountNumber);
       if (!response.ok) {
         const errorData = await response.json();
         setError(errorData.message || "An error occurred");
@@ -76,7 +76,7 @@ export default function Account() {
         accountNumber: "",
         accountName: "",
       });
-      router.push("/bank");
+      router.push("/connect");
     } catch (error) {
       setError("Failed to connect to the server. Please try again.");
       console.error(error);
@@ -105,7 +105,7 @@ export default function Account() {
               placeholder="Enter your account number"
               value={formData.accountNumber}
               onChange={handleInputChange}
-              className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full text-black p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
               required
             />
           </div>
