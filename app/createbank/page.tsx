@@ -48,7 +48,7 @@ export default function Account() {
 
     try {
       const response = await fetch(
-        "https://mainbackend-production-5606.up.railway.app/bank-account",
+        "https://mainbackend-production-5606.up.railway.app/bank",
         {
           method: "POST",
           headers: {

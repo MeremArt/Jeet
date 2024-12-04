@@ -1,17 +1,15 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
+// Updated interface to match the actual API response
 interface Bank {
-  _id: string;
+  id: string;
   code: string;
   country: string;
-  createdAt: string;
   logo: string;
   name: string;
-  updatedAt: string;
 }
 
 export default function BankSelection() {
@@ -41,13 +39,11 @@ export default function BankSelection() {
 
   const handleBankSelection = (bankId: string) => {
     try {
-      // Store the selected bank ID in localStorage
       localStorage.setItem("selectedBankId", bankId);
-
-      // Navigate to the next page (adjust the route as needed)
       router.push("/createbank");
     } catch (error) {
       console.error("Error saving bank selection:", error);
+      setError("Failed to save bank selection. Please try again.");
     }
   };
 
@@ -56,7 +52,6 @@ export default function BankSelection() {
       try {
         const token = localStorage.getItem("jwt");
         if (!token) {
-          // Redirect to login if no token is found
           router.push("/login");
           return;
         }
@@ -66,9 +61,10 @@ export default function BankSelection() {
           {
             method: "GET",
             headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
               "Cache-Control": "no-cache",
               Pragma: "no-cache",
-              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -77,18 +73,19 @@ export default function BankSelection() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data: Bank[] = await response.json();
+        const data = await response.json();
+        console.log("Fetched banks:", data); // Debug log
 
-        // Validate bank data
+        // Validate and transform the data
         const validBanks = data.filter(
-          (bank) => bank._id && bank.name && bank.logo
+          (bank: Bank) => bank.id && bank.name && bank.logo
         );
 
         setBanks(validBanks);
         setFilteredBanks(validBanks);
         setLoading(false);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
+        console.error("Error fetching banks:", err);
         setError(
           err.message || "Failed to load banks. Please try again later."
         );
@@ -99,115 +96,88 @@ export default function BankSelection() {
     fetchBanks();
   }, [router]);
 
-  const renderLoading = () => (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="text-center text-lg font-bold flex items-center"
-      >
-        <svg
-          className="animate-spin h-5 w-5 mr-3 text-purple-500"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-        Loading banks...
-      </motion.div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50">
+        <div className="text-center p-8">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading banks...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-red-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Error Loading Banks
+          </h2>
+          <p className="text-gray-700 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 p-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
+            Select Your Bank
+          </h1>
+          <div className="mb-6">
+            <input
+              type="text"
+              placeholder="Search for your bank..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="w-full p-4 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+            />
+          </div>
+          {filteredBanks.length === 0 ? (
+            <p className="text-center text-gray-500 py-8">No banks found</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto">
+              {filteredBanks.map((bank) => (
+                <motion.div
+                  key={bank.id}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-gray-50 rounded-lg p-4 cursor-pointer hover:bg-gray-100 transition"
+                  onClick={() => handleBankSelection(bank.id)}
+                >
+                  <div className="flex items-center space-x-4">
+                    <img
+                      src={bank.logo}
+                      alt={bank.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                      onError={(e) => {
+                        const imgElement = e.target as HTMLImageElement;
+                        imgElement.onerror = null;
+                        imgElement.src = "/fallback-bank-logo.png";
+                      }}
+                    />
+                    <div>
+                      <h2 className="font-semibold text-gray-800">
+                        {bank.name}
+                      </h2>
+                      <p className="text-sm text-gray-500">{bank.code}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
-
-  const renderError = () => (
-    <div className="flex items-center justify-center min-h-screen bg-red-50">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-center p-6 bg-white rounded-lg shadow-md"
-      >
-        <h2 className="text-2xl font-bold text-red-600 mb-4">
-          Oops! Something went wrong
-        </h2>
-        <p className="text-gray-700 mb-4">{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-        >
-          Try Again
-        </button>
-      </motion.div>
-    </div>
-  );
-
-  const renderBankList = () => (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="bg-white shadow-md rounded-lg p-6 max-w-lg w-full"
-      >
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Select Your Bank
-        </h1>
-        <input
-          type="text"
-          placeholder="Search for your bank (name, country, code)..."
-          value={searchQuery}
-          onChange={handleSearchChange}
-          className="w-full text-black p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mb-6"
-        />
-        {filteredBanks.length === 0 ? (
-          <p className="text-center text-gray-500">No banks found</p>
-        ) : (
-          <ul className="space-y-4 max-h-[60vh] overflow-y-auto">
-            {filteredBanks.map((bank) => (
-              <motion.li
-                key={bank._id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center p-4 bg-gray-100 rounded-md shadow-sm cursor-pointer hover:bg-gray-200"
-                onClick={() => handleBankSelection(bank._id)}
-              >
-                <img
-                  src={bank.logo}
-                  alt={bank.name}
-                  onError={(e) => {
-                    const imgElement = e.target as HTMLImageElement;
-                    imgElement.onerror = null;
-                    imgElement.src = "/fallback-bank-logo.png";
-                  }}
-                  className="w-12 h-12 rounded-full mr-4 object-cover"
-                />
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-700">
-                    {bank.name}
-                  </h2>
-                  <p className="text-gray-500 text-sm">{bank.country}</p>
-                </div>
-              </motion.li>
-            ))}
-          </ul>
-        )}
-      </motion.div>
-    </div>
-  );
-
-  if (loading) return renderLoading();
-  if (error) return renderError();
-
-  return renderBankList();
 }

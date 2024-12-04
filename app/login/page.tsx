@@ -54,7 +54,7 @@ export default function Login() {
 
       // Store the JWT in local storage
       localStorage.setItem("jwt", responseData.jwt);
-      console.log(response);
+      console.log(responseData.jwt);
 
       setSuccess(true);
       setFormData({
