@@ -63,6 +63,7 @@ export default function Account() {
       const data = await response.json();
       setValidatedAccount(data);
       setIsValidating(false);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError(
         "Failed to validate account number. Please check your account number and try again."
