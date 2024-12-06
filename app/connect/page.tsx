@@ -39,28 +39,43 @@ export default function Account() {
     }
 
     try {
+      // Create the payload object matching the expected structure
       const payload = {
         publicKey: publicKey.toBase58(),
-        accountNumber,
-        timestamp: Date.now(),
+        accountNumber: accountNumber,
+        timestamp: Math.floor(Date.now()), // Using floor to ensure integer
       };
 
-      // Sign the payload
-      const encodedPayload = new TextEncoder().encode(JSON.stringify(payload));
-      const signature = await signMessage!(encodedPayload);
+      // Create the message to sign
+      const message = new TextEncoder().encode(
+        JSON.stringify({
+          publicKey: payload.publicKey,
+          accountNumber: payload.accountNumber,
+          timestamp: payload.timestamp,
+        })
+      );
+
+      // Sign the message
+      const signature = await signMessage!(message);
+
+      // Convert signature to base64
+      const base64Signature = Buffer.from(signature).toString("base64");
+
+      // Prepare the final request body
+      const requestBody = {
+        payload: payload,
+        signature: base64Signature,
+      };
 
       const response = await fetch(
-        "https://mainbackend-production-5606.up.railway.app/account",
+        "https://mainbackend-production-5606.up.railway.app/wallet",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("jwt")}`,
           },
-          body: JSON.stringify({
-            payload,
-            signature: Buffer.from(signature).toString("base64"),
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
 
