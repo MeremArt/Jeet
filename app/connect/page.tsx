@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
+import bs58 from "bs58";
 
 export default function Account() {
   const router = useRouter();
@@ -43,23 +44,19 @@ export default function Account() {
       const payload = {
         publicKey: publicKey.toBase58(),
         accountNumber: accountNumber,
-        timestamp: Math.floor(Date.now()), // Using floor to ensure integer
+        timestamp: Date.now()
       };
 
       // Create the message to sign
       const message = new TextEncoder().encode(
-        JSON.stringify({
-          publicKey: payload.publicKey,
-          accountNumber: payload.accountNumber,
-          timestamp: payload.timestamp,
-        })
+        JSON.stringify(payload)
       );
 
       // Sign the message
       const signature = await signMessage!(message);
 
       // Convert signature to base64
-      const base64Signature = Buffer.from(signature).toString("base64");
+      const base64Signature = bs58.encode(signature)
 
       // Prepare the final request body
       const requestBody = {
