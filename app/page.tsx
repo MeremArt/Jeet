@@ -56,7 +56,7 @@ export default function Home() {
         <div className="mt-16 lg:mt-0">
           <div className="relative">
             <img
-              src="/placeholder.svg?height=594&width=388"
+              src="https://res.cloudinary.com/dtfvdjvyr/image/upload/v1734569481/Rectangle_dyc7sg.png"
               alt="Paj.cash App Interface"
               className="w-[388px] h-[594px] object-contain"
             />
