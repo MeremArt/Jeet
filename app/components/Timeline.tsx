@@ -40,7 +40,7 @@ export default function Timeline() {
           color="#CDDC39"
         />
         <TimelineItem
-          label="Product Launch"
+          label="Token Launch"
           icon={<BiPackage className="w-4 h-4 text-[#ECECEC]" />}
           color="#7C22FF"
         />
