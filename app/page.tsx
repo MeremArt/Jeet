@@ -1,11 +1,36 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Logo from "./components/Logo";
 import Timeline from "./components/Timeline";
 import { FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+const images = [
+  "https://res.cloudinary.com/dtfvdjvyr/image/upload/v1734569481/Rectangle_dyc7sg.png",
+  // Add your additional image URLs here
+  "https://res.cloudinary.com/dtfvdjvyr/image/upload/v1734602189/Rectangle_1_xuqjvf.png",
+  "https://res.cloudinary.com/dtfvdjvyr/image/upload/v1734602255/Rectangle_2_qbwhrz.png",
+];
 
+const words = ["Fastest", "Easiest", "Smart"];
 export default function Home() {
   const [email, setEmail] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  useEffect(() => {
+    const imageInterval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === images.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 3000);
+    const wordInterval = setInterval(() => {
+      setCurrentWordIndex((prevIndex) =>
+        prevIndex === words.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 3000);
+    return () => {
+      clearInterval(imageInterval);
+      clearInterval(wordInterval);
+    };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,8 +48,10 @@ export default function Home() {
       <main className="container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between mt-16">
         <div className="max-w-[628px]">
           <h1 className="font-montserrat font-bold text-[56px] leading-[72px] text-[#121212] mb-6">
-            <span className="text-[#E64A19]">Fastest</span> way to convert any
-            token to Naira.
+            <span className="text-[#E64A19] transition-all duration-500">
+              {words[currentWordIndex]}
+            </span>{" "}
+            way to convert any token to Naira.
           </h1>
           <p className="font-montserrat font-medium text-lg text-[#121212] mb-8">
             Off ramp from your favourite wallet.
@@ -56,9 +83,10 @@ export default function Home() {
         <div className="mt-16 lg:mt-0">
           <div className="relative">
             <img
-              src="https://res.cloudinary.com/dtfvdjvyr/image/upload/v1734569481/Rectangle_dyc7sg.png"
+              src={images[currentImageIndex]}
               alt="Paj.cash App Interface"
-              className="w-[388px] h-[594px] object-contain"
+              className="w-[388px] h-[594px] object-contain transition-opacity duration-500"
+              key={images[currentImageIndex]}
             />
             <div className="absolute bottom-[-22px] left-1/2 transform -translate-x-1/2 w-[372px] h-[45px] bg-[#D9D9D9] rounded-full blur-lg" />
           </div>
